@@ -60,11 +60,7 @@ sudo iptables -I INPUT -s 0/0 -p tcp --dport 8400 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 8500 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 sudo iptables -A OUTPUT -p tcp --dport 8500 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 
-if [ -d /etc/sysconfig ]; then
-  sudo iptables-save | sudo tee /etc/sysconfig/iptables
-else
-  sudo iptables-save | sudo tee /etc/iptables.rules
-fi
+sudo bash -c "iptables-save > /etc/iptables/rules.v4"
 
 echo "Installing Systemd service..."
 sudo mkdir -p /etc/sysconfig
