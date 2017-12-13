@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Configuring iptables-persistent to prevent dialogue boxes during install..."
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
+
 echo "Installing dependencies..."
 if [ -x "$(command -v apt-get)" ]; then
-  sudo su -s /bin/bash -c 'sleep 30 && apt-get update && apt-get install unzip' root
+  sudo su -s /bin/bash -c 'sleep 30 && apt-get update && apt-get install unzip && apt-get -y install iptables-persistent' root
 else
   sudo yum update -y
   sudo yum install -y unzip wget
@@ -53,6 +57,8 @@ sudo iptables -I INPUT -s 0/0 -p tcp --dport 8300 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8301 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8302 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8400 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 8500 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --dport 8500 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 
 if [ -d /etc/sysconfig ]; then
   sudo iptables-save | sudo tee /etc/sysconfig/iptables
