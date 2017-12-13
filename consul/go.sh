@@ -34,7 +34,7 @@ CONSUL_FLAGS="-server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -da
 EOF
 
 echo "Creating Systemd daemon config..."
-read -d '' CONSUL_DAEMON_CONFIG <<"EOF"
+cat >/tmp/consul.service << EOF
 [Unit]
 Description=consul agent
 Requires=network-online.target
@@ -50,15 +50,13 @@ ExecReload=/bin/kill -HUP $MAINPID
 WantedBy=multi-user.target
 EOF
 
-echo "${CONSUL_DAEMON_CONFIG}" >> /tmp/consul.service
-
 echo "Opening ports..."
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8300 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8301 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8302 -j ACCEPT
 sudo iptables -I INPUT -s 0/0 -p tcp --dport 8400 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 8500 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
-sudo iptables -A OUTPUT -p tcp --dport 8500 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 8500 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 
 sudo bash -c "iptables-save > /etc/iptables/rules.v4"
 
