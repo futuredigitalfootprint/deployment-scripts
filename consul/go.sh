@@ -48,6 +48,18 @@ EOF
 
 echo "${CONSUL_DAEMON_CONFIG}" >> /tmp/consul.service
 
+echo "Opening ports..."
+sudo iptables -I INPUT -s 0/0 -p tcp --dport 8300 -j ACCEPT
+sudo iptables -I INPUT -s 0/0 -p tcp --dport 8301 -j ACCEPT
+sudo iptables -I INPUT -s 0/0 -p tcp --dport 8302 -j ACCEPT
+sudo iptables -I INPUT -s 0/0 -p tcp --dport 8400 -j ACCEPT
+
+if [ -d /etc/sysconfig ]; then
+  sudo iptables-save | sudo tee /etc/sysconfig/iptables
+else
+  sudo iptables-save | sudo tee /etc/iptables.rules
+fi
+
 echo "Installing Systemd service..."
 sudo mkdir -p /etc/sysconfig
 sudo mkdir -p /etc/systemd/system/consul.d
