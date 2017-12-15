@@ -38,7 +38,7 @@ After=network-online.target
 [Service]
 EnvironmentFile=-/etc/sysconfig/consul
 Restart=on-failure
-ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d
+ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d -bind=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'` -client=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
