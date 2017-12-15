@@ -38,7 +38,7 @@ After=network-online.target
 [Service]
 EnvironmentFile=-/etc/sysconfig/consul
 Restart=on-failure
-ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d -bind=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'` -client=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
+ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -retry-join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d -bind=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'` -client=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
@@ -60,7 +60,6 @@ sudo mkdir -p /etc/sysconfig
 sudo mkdir -p /etc/systemd/system/consul.d
 sudo chown root:root /tmp/consul.service
 sudo mv /tmp/consul.service /etc/systemd/system/consul.service
-sudo mv /tmp/consul*json /etc/systemd/system/consul.d/ || echo
 sudo chmod 0644 /etc/systemd/system/consul.service
 
 echo "Starting Consul..."
