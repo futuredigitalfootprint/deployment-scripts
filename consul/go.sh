@@ -25,8 +25,8 @@ sudo mv consul /usr/local/bin/consul
 sudo mkdir -p /opt/consul/data
 
 # Read from the file we created
-SERVER_COUNT=$0
-CONSUL_JOIN=$1
+SERVER_COUNT=$1
+CONSUL_JOIN=$2
 
 echo "Creating Systemd daemon config..."
 cat >/tmp/consul.service << EOF
