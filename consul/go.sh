@@ -28,11 +28,6 @@ sudo mkdir -p /opt/consul/data
 SERVER_COUNT=$0
 CONSUL_JOIN=$1
 
-# Write the flags to a temporary file
-cat >/tmp/consul_flags << EOF
-CONSUL_FLAGS="-server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui"
-EOF
-
 echo "Creating Systemd daemon config..."
 cat >/tmp/consul.service << EOF
 [Unit]
@@ -43,7 +38,7 @@ After=network-online.target
 [Service]
 EnvironmentFile=-/etc/sysconfig/consul
 Restart=on-failure
-ExecStart=/usr/local/bin/consul agent $CONSUL_FLAGS -config-dir=/etc/systemd/system/consul.d
+ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
@@ -67,9 +62,6 @@ sudo chown root:root /tmp/consul.service
 sudo mv /tmp/consul.service /etc/systemd/system/consul.service
 sudo mv /tmp/consul*json /etc/systemd/system/consul.d/ || echo
 sudo chmod 0644 /etc/systemd/system/consul.service
-sudo mv /tmp/consul_flags /etc/sysconfig/consul
-sudo chown root:root /etc/sysconfig/consul
-sudo chmod 0644 /etc/sysconfig/consul
 
 echo "Starting Consul..."
 sudo systemctl enable consul.service
