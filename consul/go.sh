@@ -23,6 +23,8 @@ unzip consul.zip >/dev/null
 chmod +x consul
 sudo mv consul /usr/local/bin/consul
 sudo mkdir -p /opt/consul/data
+sudo mkdir -p /etc/consul.d
+sudo chmod 0644 /etc/consul.d
 
 SERVER_COUNT=$1
 CONSUL_JOIN=$2
@@ -30,7 +32,7 @@ MASTER_TOKEN=$3
 ADDRESS=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
 
 echo "Creating Consul config file..."
-cat >/etc/consul.d/config.json << EOF
+sudo tee /etc/consul.d/config.json << EOF
 {
   "acl_datacenter":"arbitrary",
   "acl_default_policy":"deny",
