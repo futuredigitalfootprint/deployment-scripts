@@ -24,9 +24,27 @@ chmod +x consul
 sudo mv consul /usr/local/bin/consul
 sudo mkdir -p /opt/consul/data
 
-# Read from the file we created
 SERVER_COUNT=$1
 CONSUL_JOIN=$2
+MASTER_TOKEN=$3
+ADDRESS=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
+
+echo "Creating Consul config file..."
+cat >/etc/consul.d/config.json << EOF
+{
+  "acl_datacenter":"arbitrary",
+  "acl_default_policy":"deny",
+  "acl_down_policy":"extend-cache",
+  "acl_master_token":"${MASTER_TOKEN}",
+  "bind_addr":"${ADDRESS}",
+  "bootstrap_expect":${SERVER_COUNT},
+  "client_addr":"${ADDRESS}",
+  "data_dir":"/opt/consul/data",
+  "retry_join":"${CONSUL_JOIN}",
+  "server":true,
+  "ui":true,
+}
+EOF
 
 echo "Creating Systemd daemon config..."
 cat >/tmp/consul.service << EOF
@@ -38,7 +56,7 @@ After=network-online.target
 [Service]
 EnvironmentFile=-/etc/sysconfig/consul
 Restart=on-failure
-ExecStart=/usr/local/bin/consul agent -server -bootstrap-expect=${SERVER_COUNT} -retry-join=${CONSUL_JOIN} -data-dir=/opt/consul/data -ui -config-dir=/etc/systemd/system/consul.d -bind=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'` -client=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
+ExecStart=/usr/local/bin/consul agent -config-dir=/etc/consul.d
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
